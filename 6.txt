@@ -1,0 +1,63 @@
+1. /etc/fstab 与开机挂载
+	开机要挂载的东西被记录在 /etc/fstab 中
+	一些规则
+		/ 必须第一个挂载
+		一个 mount point 只能挂载一次
+		一个partition只能挂载一次
+		如要umount，必须先把工作目录移出挂载点之外
+	/etc/fstab 格式
+		装置名或其label名
+		挂载点
+		文件系统类型
+		文件系统参数，就是mount -o 设定的参数
+		能否被dump备份指令作用
+			0为不备份，1为每天备份
+		能否以fsck检查扇区
+			0为不检查，1为最早检查，2为在1之后检查
+			一般根目录设为1，其他需要检查的设为2就行了
+	tip
+		在往fstab里面加新的东西之后，可以mount -a试验一下，免得写错导致下次开机失败
+
+2. loop挂载
+	loop允许将一个文件当成一个设备进行挂载
+	挂载iso镜像文件
+		mount -o loop 1.iso /mnt/mydvd
+	建立一个大档案作为文件系统挂载
+		可以用来解决分区不良的问题
+			在分区多余的地方创建一个大文件，重新挂载，这样就好像多了一个分区
+		步骤
+			建立空档案（用文件复制命令dd）
+				dd if=/dev/zero of=/home/loopdev bs=1M count=512
+			格式化该档案
+			loop挂载
+
+3. 创建swap（假如一开始分区的时候忘记分配swap了）
+	使用实体分割槽配置swap
+		用fdisk分割出一个分区
+			可能要改一下该分区的system id （82）
+			（不要忘记partprobe）
+		格式化为swap
+			mkswap 装置名
+		启动swap
+			swapon 装置名
+			swapon -s 列出目前使用的swap装置
+			swapoff 可以停止使用装置
+		用free观察内存使用
+	使用档案创建swap
+		即用dd创建一个大文件并格式化为swap
+	swap的意义
+		对于服务器比较重要，因为物理内存还是有可能不够的
+		如果Linux主机可以进入休眠模式，则swap可以用来储存一些状态数据
+
+4. 文件系统的特殊观察与操作
+	使用parted分割2TB以上的硬盘
+	parted [装置] [指令 [参数]]
+		指令有
+			新增分割：mkpart [primary|logical|extended] [ext3|vfat] 开始位置 结束位置
+			分割表：print
+			删除分区：rm [partition]
+	注意指令立即生效，要谨慎
+
+5. page 301
+
+			
