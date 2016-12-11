@@ -1,0 +1,122 @@
+1. 备份工具
+	dump
+		dump [-Suvj] [-level] [-f 备份档] 待备份资料
+		dump -W
+			-S 只列出后面的数据需要多少bytes
+			-u 将这次dump的时间记录到 /etc/dumpdates 中
+				若待备份的只是目录，不是单一文件系统，则不支持
+			-v 显示过程
+			-j 用bzip2压缩
+			-level 等级0-9，0是完整备份，1只备份与0不一样的，2只备份与1不一样的。。
+				若待备份的不是单一文件系统，则只能是0
+			-f 产生的档案，或如 /dev/st0 的装置名
+				若待备份的不是单一文件系统，则不能使装置名，而只能是本目录下的一个文件
+			-W 列出在 /etc/fstab 里面的具有 dump 设定的 partition 是否有备份过
+			
+
+	restore
+		restore -t [-f dumpfile] [-h]
+			查看dump档信息
+		restore -C [-f dumpfile] [-D 挂载点]
+			比较dump 与实际档案
+		restore -i [-f dumpfile]
+			进入互动模式，可以仅还原部分档案，用在 dump 目录时的还原
+		restore -r [-f dumpfile]
+			还原整个文件系统
+
+2. 光盘写入工具
+	mkisofs 建立映像
+		（要刻录进光盘一定要先建立iso才行）
+		mkisofs [-o 映像档] [-rv] [-m file] 待备份文件.. [-V vol] -graft-point isodir=systemdir ...
+			-r 透过 Rock Ridge 产生支持 Unix/Linux 的档案数据，可记录较多的信息，否则只支持DOS档名，短而信息少
+			-v 显示过程
+			-m exclude
+			-V 建立Volume
+			-graft-point
+				by default，创建完并没有目录结构，所有文件都在iso的根目录
+				-graft-point /videos=/src/videos /etc=/etc
+
+	cdrecord 刻录光盘
+		cdrecord -scanbus dev=ATA
+			查询刻录机位置（IDE和SATA 接口都可以用这个查询）		cdrecord -v dev=ATA:x,y,z blank=[fast|all]
+			抹除（可重复读写片），x,y,z 是刻录机所在的位置		cdrecord -v dev=ATA:x,y,z -format
+			格式化 DVD+RW
+		cdrecord -v dev=ATA:x,y,z [可用选项功能] file.iso
+			常见选项有
+				-data 以数据写入，而不是以音轨-audio
+				-sao 支持 DVD-RW 格式
+				driveropts=burnfree 写DVD时也需要的
+
+3. 其他压缩与备份
+	dd 直接读取装置内容存为文件
+		dd if="input_file" of="output_file" bs="block_size" count="number"
+			e.g. 把磁盘第一个分区（含有MBR 和 partition table）备份下来
+			dd if=/dev/hdc of=/tmp/mbr.back bs=512 count=1
+		如果不指定count，那就会把整个分区备份下来了，还原的时候反向复制就好
+			如果of是一个没有格式化过的分区，那你可以把整个分区包括 superblock、boot sector等等都复制过来，真正成为一个一模一样的分区
+
+	cpio
+		cpio -ovcB > [file|device] <==备份 
+			要配合find等可以找到文件名的命令来用
+				find /boot | cpio -ocvB > /tmp/boot.cpio
+			-o 输出
+			-B block大小从 512B 増为 5120B
+			-c 一种较新的 portable format 方式储存
+			-v 显示过程
+
+		cpio -ivcdu < [file|device] <==还原
+			-i 把数据从档案中读出
+			-d 自动建立不存在的目录
+			-u 自动覆盖较旧的
+
+		cpio -ivct < [file|device] <==察看
+			-t 配合-i用以查看
+		
+4. vim & vi
+	why?
+		所有 Unix-like 系统都会内建vi
+		很多软件的编辑接口都会呼叫vi
+		vim有强大的程序编辑能力
+		使用起来很快！
+
+	vi
+		一般模式
+			方向键：移动
+			数字+方向：可以一次飞远一点
+			ctrl+f, ctrl+b：下一页、上一页
+			0：移到行首
+			$：移到行尾
+			G：移到文件末
+			2G：移到第2行
+			gg：移到文件头
+			/word：向下查找，n下一个，N上一个
+			:2,3s/word1/word2/g：在2-3行间将word1替换为word2
+			:1,$s/word1/word2/gc：1-最后一行，且逐个询问是否替换
+			x：向后删除，X向前删除
+			dd：删除本行
+			20dd：删除从这里开始共20行
+			yy：复制行
+			10yy：复制10行
+			p：贴在下一行，P贴在上一行
+			u：undo
+			ctrl+r：redo
+			.：重复上一个动作
+		编辑模式
+			i：在当前insert
+			o：下面插入一行，O上面插入一行
+			a：append，在后面insert
+			r：replace
+		指令列命令模式
+			:wq
+			:q!
+			:w file：另存为
+			:! command：暂时离开vi查看command结果，:! ls /home
+			:set nu：显示行号，:set nonu
+
+	暂存档
+		编辑时会有一个.swp 暂存档，当不正常退出后重新打开vi，会提示说检测到swp，是否恢复
+		多人同时编辑时也可能会出现swp已存在的情况
+
+
+
+

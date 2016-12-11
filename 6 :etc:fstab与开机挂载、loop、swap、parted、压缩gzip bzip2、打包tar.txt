@@ -58,6 +58,56 @@
 			删除分区：rm [partition]
 	注意指令立即生效，要谨慎
 
-5. page 301
+5. 压缩
+	常见压缩格式（注意这些扩展名的存在只是为了让人类看而已，可以通过file命令知道文件类型）
+		*.Z		compress压缩的（过时，能用gzip来解）
+		*.gz		gzip压缩的
+		*.bz2		bzip2压缩的
+		*.tar		tar打包的，没有压缩
+		*.tar.gz	tar打包，gzip压缩
+		*.tar.bz2	tar打包，bzip2压缩
+		（压缩是针对文件的，所以要打包成一个文件再压缩）
 
+	gzip, zcat
+		gzip [-cdtv#] 文件
+			-c 将压缩的数据输出到屏幕上，可以重定向
+				gzip -c 1.txt > 1.txt.gz
+				这样可以保留源文件（默认是删除的）
+			-d 解压缩
+			-v 显示压缩比等数据
+			-# 压缩等级，-1最快但压缩比最差，-9最慢，默认-6
+		zcat 文件.gz
+			读取原来是纯文档的gzip, compress 文件
+	
+	bzip2, bzcat (效果比gzip好)
+		bzip2 [-cdkzv#] 文件
+			-cdv# 跟gzip一样
+			-z 压缩
+			-k 保留源文件
+
+6. 打包 tar
+	参数
+		-j 用bzip2进行压缩、解压
+		-z 用gzip进行压缩、解压
+		-v 将正在处理的文件名显示出来
+		-f 要处理的档名
+
+		-c 打包
+		-t 查看内容
+		-x 解包
+		-C 指定解包到特定目录
+
+		-p 保留备份数据的原本权限与属性，常用于备份重要的配置文件 
+			tar -zpcv -f /root/etc.tar.gz /etc
+		-P 保留绝对路径，亦即允许备份数据中含有根目录存在
+			如果保留，解压时一定会解压到原来那个目录，可能会导致意外覆盖，所以一般不用
+		--exclude=FILE 在压缩的过程中，不要将 FILE 打包
+		—-newer=时间 仅打包 mtime 和 ctime 在指定时间之后的
+			—-new-mtime
+
+	常用指令
+		打包与压缩		tar [-j|-z][cv] [-f 建立的压缩文件] filename... （可以多个目录或文件）
+		查询		tar [-j|-z][tv] [-f 压缩文件]
+		解包与解压		tar [-j|-z][xv] [-f 压缩文件] [-C 目录]
+			只解压其中一个文件：tar -jxv -f 1.tar.bz2 1.txt
 			
