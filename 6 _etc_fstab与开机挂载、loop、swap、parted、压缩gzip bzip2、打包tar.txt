@@ -1,0 +1,113 @@
+1. /etc/fstab 与开机挂载
+	开机要挂载的东西被记录在 /etc/fstab 中
+	一些规则
+		/ 必须第一个挂载
+		一个 mount point 只能挂载一次
+		一个partition只能挂载一次
+		如要umount，必须先把工作目录移出挂载点之外
+	/etc/fstab 格式
+		装置名或其label名
+		挂载点
+		文件系统类型
+		文件系统参数，就是mount -o 设定的参数
+		能否被dump备份指令作用
+			0为不备份，1为每天备份
+		能否以fsck检查扇区
+			0为不检查，1为最早检查，2为在1之后检查
+			一般根目录设为1，其他需要检查的设为2就行了
+	tip
+		在往fstab里面加新的东西之后，可以mount -a试验一下，免得写错导致下次开机失败
+
+2. loop挂载
+	loop允许将一个文件当成一个设备进行挂载
+	挂载iso镜像文件
+		mount -o loop 1.iso /mnt/mydvd
+	建立一个大档案作为文件系统挂载
+		可以用来解决分区不良的问题
+			在分区多余的地方创建一个大文件，重新挂载，这样就好像多了一个分区
+		步骤
+			建立空档案（用文件复制命令dd）
+				dd if=/dev/zero of=/home/loopdev bs=1M count=512
+			格式化该档案
+			loop挂载
+
+3. 创建swap（假如一开始分区的时候忘记分配swap了）
+	使用实体分割槽配置swap
+		用fdisk分割出一个分区
+			可能要改一下该分区的system id （82）
+			（不要忘记partprobe）
+		格式化为swap
+			mkswap 装置名
+		启动swap
+			swapon 装置名
+			swapon -s 列出目前使用的swap装置
+			swapoff 可以停止使用装置
+		用free观察内存使用
+	使用档案创建swap
+		即用dd创建一个大文件并格式化为swap
+	swap的意义
+		对于服务器比较重要，因为物理内存还是有可能不够的
+		如果Linux主机可以进入休眠模式，则swap可以用来储存一些状态数据
+
+4. 文件系统的特殊观察与操作
+	使用parted分割2TB以上的硬盘
+	parted [装置] [指令 [参数]]
+		指令有
+			新增分割：mkpart [primary|logical|extended] [ext3|vfat] 开始位置 结束位置
+			分割表：print
+			删除分区：rm [partition]
+	注意指令立即生效，要谨慎
+
+5. 压缩
+	常见压缩格式（注意这些扩展名的存在只是为了让人类看而已，可以通过file命令知道文件类型）
+		*.Z		compress压缩的（过时，能用gzip来解）
+		*.gz		gzip压缩的
+		*.bz2		bzip2压缩的
+		*.tar		tar打包的，没有压缩
+		*.tar.gz	tar打包，gzip压缩
+		*.tar.bz2	tar打包，bzip2压缩
+		（压缩是针对文件的，所以要打包成一个文件再压缩）
+
+	gzip, zcat
+		gzip [-cdtv#] 文件
+			-c 将压缩的数据输出到屏幕上，可以重定向
+				gzip -c 1.txt > 1.txt.gz
+				这样可以保留源文件（默认是删除的）
+			-d 解压缩
+			-v 显示压缩比等数据
+			-# 压缩等级，-1最快但压缩比最差，-9最慢，默认-6
+		zcat 文件.gz
+			读取原来是纯文档的gzip, compress 文件
+	
+	bzip2, bzcat (效果比gzip好)
+		bzip2 [-cdkzv#] 文件
+			-cdv# 跟gzip一样
+			-z 压缩
+			-k 保留源文件
+
+6. 打包 tar
+	参数
+		-j 用bzip2进行压缩、解压
+		-z 用gzip进行压缩、解压
+		-v 将正在处理的文件名显示出来
+		-f 要处理的档名
+
+		-c 打包
+		-t 查看内容
+		-x 解包
+		-C 指定解包到特定目录
+
+		-p 保留备份数据的原本权限与属性，常用于备份重要的配置文件 
+			tar -zpcv -f /root/etc.tar.gz /etc
+		-P 保留绝对路径，亦即允许备份数据中含有根目录存在
+			如果保留，解压时一定会解压到原来那个目录，可能会导致意外覆盖，所以一般不用
+		--exclude=FILE 在压缩的过程中，不要将 FILE 打包
+		—-newer=时间 仅打包 mtime 和 ctime 在指定时间之后的
+			—-new-mtime
+
+	常用指令
+		打包与压缩		tar [-j|-z][cv] [-f 建立的压缩文件] filename... （可以多个目录或文件）
+		查询		tar [-j|-z][tv] [-f 压缩文件]
+		解包与解压		tar [-j|-z][xv] [-f 压缩文件] [-C 目录]
+			只解压其中一个文件：tar -jxv -f 1.tar.bz2 1.txt
+			
