@@ -1,2 +1,37 @@
-1. vim
+1. vim（现在很多系统中 vi 都已变成 vim 的alias）
+	visual block
+		v 字符选择		V 行选择 		[Ctrl]+v 区块选择（长方形）		y 复制选中部分，之后p会在光标所在处paste（注意yy时候p是粘在下一行）
+		d 删除选中
+
+	多档案编辑
+		vim file1 file2
+		:n 编辑下一个档案		:N 编辑上一个档案
+		:files 列出目前这个 vim 的开启的所有档案
+		（如果打开多个vim process，则剪贴板是不能互通的）
+
+	多窗口
+		:sp {filename}
+			没有指定filename时会打开同一文件
+		ctrl+w, 上或下
+			在窗口间切换
+
+	vim记录与环境设定
+		~/.viminfo
+			记录有你使用vim的动作，比如关闭时光标的位置、关闭时搜索的内容等，便于下次打开的时候复原
+		~/.vimrc
+			vim环境设定在 /etc/vimrc，想自定义，则创建个 ~/.vimrc
+			常用设定（文件中就不用冒号即可）
+				:set nu (nonu)
+				:set autoindent (noautoindent)
+				:set backup
+					设定后会自动有一个 filename~ 备份文件
+				:set backspace=(012)
+					2则允许用backspace删除任意字符，0或1则仅可删除刚刚输入的字符
+				:set
+					显示与默认参数不同的参数
+				:syntax on (off)
+					语法高亮，有些默认是关上的
+				:set bg=dark (light)
+	
+	中文编码
 
