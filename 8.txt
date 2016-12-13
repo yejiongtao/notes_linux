@@ -33,5 +33,32 @@
 					语法高亮，有些默认是关上的
 				:set bg=dark (light)
 	
+2. 文本文件的其他问题
 	中文编码
+		tty1-tty6 本身就不支持中文编码
+		桌面系统中，你要注意：
+			bash 的语系，与LANG 有关
+			档案原本的编码
+			开启终端的软件（如GNOME-terminal）的编码（通常图形界面就可以设置）
 
+	换行符
+		DOS(Windows)下是CRLF，Linux下是LF
+			如果shell script是在DOS下写的，到了Linux会导致无法执行
+		dos2unix [-kn] file [newfile]
+		unix2dos [-kn] file [newfile]
+			-n 保留原文档，转换后输出到newfile
+			-k 保留原来的mtime
+
+	iconv --list
+	iconv -f 原编码 -t 新编码 filename [-o newfile]
+		转换编码
+
+3. shell
+	/etc/shells	系统支持的shell类型（linux默认是bash）
+		/bin/sh 已被 /bin/bash 替代
+	/etc/passwd	记录不同用户登入所应该打开的shell
+	shell 内建指令
+		一些指令如 cd, umask 等，都内建在shell里面了
+		type cd 可以看cd是什么类型的指令
+
+4. 
