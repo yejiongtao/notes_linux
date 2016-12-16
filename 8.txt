@@ -60,5 +60,12 @@
 	shell 内建指令
 		一些指令如 cd, umask 等，都内建在shell里面了
 		type cd 可以看cd是什么类型的指令
+	
+	变量规则
+		myname=Tau		# 等号两边不能直接接空格
+		myname="Tau Ye"		# 用 " 或 ' 把带有空格的字符串括起来
+		hi="hi $myname"		# "会evaluate里面的表达式，'是纯字符串
+		echo $myname		# 或 ${myname}
+		version=$(uname -r)	# 用 $() 来执行其他指令
+		PATH=${PATH}:/bin	# 用 ${} 或 "$变量" 来累加内容
 
-4. 
